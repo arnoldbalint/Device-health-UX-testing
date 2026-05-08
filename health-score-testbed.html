@@ -1,0 +1,1314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Device Health Score — UX Testbed</title>
+<link rel="stylesheet" href="colors_and_type.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font: var(--goto-body-small);
+    background: var(--goto-neutral-050);
+    color: var(--goto-type-color-default);
+    min-height: 100vh;
+  }
+
+  /* ── Layout ─────────────────────────────────────────────────────────── */
+  .app {
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    grid-template-rows: 52px 1fr;
+    min-height: 100vh;
+  }
+
+  .topbar {
+    grid-column: 1/-1;
+    background: var(--goto-surface-color-default);
+    border-bottom: 1px solid var(--goto-border-color-default);
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    gap: 12px;
+  }
+  .topbar-logo {
+    width: 22px; height: 22px;
+    background: var(--goto-purple-500);
+    border-radius: 6px;
+    display: grid; place-items: center;
+    flex-shrink: 0;
+  }
+  .topbar-logo svg { width: 14px; height: 14px; fill: #fff; }
+  .topbar-title { font: var(--goto-body-medium-strong); }
+  .topbar-sub { font: var(--goto-body-small); color: var(--goto-type-color-secondary); margin-left: 4px; }
+  .topbar-spacer { flex: 1; }
+  .chip {
+    font: var(--goto-caption-medium-strong);
+    padding: 2px 8px;
+    border-radius: var(--goto-radius-circle);
+    background: var(--goto-surface-color-brand-secondary);
+    color: var(--goto-type-color-brand);
+  }
+
+  /* ── Controls panel ───────────────────────────────────────────────────── */
+  .controls {
+    background: var(--goto-surface-color-default);
+    border-right: 1px solid var(--goto-border-color-default);
+    overflow-y: auto;
+    padding: 16px 0;
+  }
+
+  .section {
+    padding: 0 16px 12px;
+    border-bottom: 1px solid var(--goto-border-color-default);
+    margin-bottom: 4px;
+  }
+  .section:last-child { border-bottom: none; }
+
+  .section-title {
+    font: var(--goto-caption-medium-strong);
+    color: var(--goto-type-color-secondary);
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    margin-bottom: 10px;
+    padding-top: 12px;
+  }
+
+  .field { margin-bottom: 10px; }
+  .field label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font: var(--goto-caption-medium-strong);
+    margin-bottom: 4px;
+  }
+  .field label .val {
+    font: var(--goto-caption-medium);
+    color: var(--goto-type-color-secondary);
+    min-width: 28px;
+    text-align: right;
+  }
+
+  input[type=range] {
+    width: 100%;
+    accent-color: var(--goto-purple-500);
+    height: 4px;
+    cursor: pointer;
+  }
+
+  select, input[type=number] {
+    width: 100%;
+    padding: 6px 10px;
+    border: 1px solid var(--goto-border-color-default);
+    border-radius: var(--goto-radius-small);
+    font: var(--goto-body-small);
+    background: var(--goto-surface-color-default);
+    color: var(--goto-type-color-default);
+    cursor: pointer;
+  }
+  select:focus, input[type=number]:focus {
+    outline: 2px solid var(--goto-purple-500);
+    outline-offset: 1px;
+  }
+
+  .checkbox-group { display: flex; flex-direction: column; gap: 6px; }
+  .checkbox-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    cursor: pointer;
+    padding: 6px 8px;
+    border-radius: var(--goto-radius-small);
+    transition: background .1s;
+  }
+  .checkbox-item:hover { background: var(--goto-neutral-050); }
+  .checkbox-item input[type=checkbox] {
+    accent-color: var(--goto-purple-500);
+    width: 14px; height: 14px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    cursor: pointer;
+  }
+  .checkbox-item .signal-info { flex: 1; }
+  .checkbox-item .signal-name {
+    font: var(--goto-caption-medium-strong);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .checkbox-item .signal-meta {
+    font: var(--goto-caption-small);
+    color: var(--goto-type-color-secondary);
+  }
+
+  .severity-badge {
+    font: var(--goto-caption-small-strong);
+    padding: 1px 5px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+  .sev-critical { background: rgba(209,47,58,.12); color: var(--goto-red-500); }
+  .sev-high     { background: rgba(246,141,46,.15); color: var(--goto-orange-500); }
+  .sev-medium   { background: rgba(242,221,6,.2);   color: var(--goto-yellow-600); }
+
+  .penalty-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 8px;
+    border-radius: var(--goto-radius-small);
+    margin-bottom: 4px;
+  }
+  .penalty-row label { font: var(--goto-caption-medium-strong); flex: 1; }
+  .penalty-row input[type=number] {
+    width: 60px;
+    padding: 4px 6px;
+    text-align: right;
+  }
+
+  .weight-row {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .weight-row .wlabel {
+    font: var(--goto-caption-medium);
+    white-space: nowrap;
+    width: 28px;
+    color: var(--goto-type-color-secondary);
+  }
+  .weight-row .wval { font: var(--goto-caption-medium); text-align: right; }
+
+  .btn-row { display: flex; gap: 8px; margin-top: 4px; }
+  .btn {
+    flex: 1;
+    padding: 7px 10px;
+    border-radius: var(--goto-radius-small);
+    border: none;
+    font: var(--goto-button-small);
+    cursor: pointer;
+    transition: background .15s, opacity .15s;
+  }
+  .btn-primary { background: var(--goto-purple-500); color: #fff; }
+  .btn-primary:hover { background: var(--goto-purple-600); }
+  .btn-secondary {
+    background: transparent;
+    color: var(--goto-type-color-default);
+    border: 1px solid var(--goto-border-color-default);
+  }
+  .btn-secondary:hover { background: var(--goto-neutral-050); }
+
+  /* ── Main content ────────────────────────────────────────────────────── */
+  .main {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    overflow-y: auto;
+    padding: 24px;
+  }
+
+  /* ── Score card ───────────────────────────────────────────────────────── */
+  .score-hero {
+    display: flex;
+    gap: 20px;
+    align-items: stretch;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+
+  .score-card {
+    background: var(--goto-surface-color-default);
+    border-radius: var(--goto-radius-large);
+    border: 1px solid var(--goto-border-color-default);
+    box-shadow: var(--goto-elevation-small);
+    padding: 24px 28px;
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    flex: 0 0 auto;
+  }
+
+  .score-ring-wrap { position: relative; width: 120px; height: 120px; flex-shrink: 0; }
+  .score-ring-wrap svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .score-ring-text {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 1px;
+  }
+  .score-number {
+    font: var(--goto-heading-medium);
+    line-height: 1;
+    transition: color .4s;
+  }
+  .score-label {
+    font: var(--goto-caption-small);
+    color: var(--goto-type-color-secondary);
+    text-transform: uppercase;
+    letter-spacing: .5px;
+  }
+
+  .score-details { min-width: 180px; }
+  .score-state {
+    font: var(--goto-body-medium-strong);
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .state-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .score-band-label {
+    font: var(--goto-caption-medium);
+    color: var(--goto-type-color-secondary);
+    margin-bottom: 14px;
+  }
+
+  .breakdown-list { display: flex; flex-direction: column; gap: 4px; }
+  .breakdown-item {
+    display: flex;
+    justify-content: space-between;
+    font: var(--goto-caption-medium);
+  }
+  .breakdown-item .bk-label { color: var(--goto-type-color-secondary); }
+  .breakdown-item .bk-val { font: var(--goto-caption-medium-strong); }
+  .breakdown-item .bk-deduct { color: var(--goto-type-color-danger); }
+  .breakdown-item .bk-start { color: var(--goto-type-color-brand); }
+
+  /* ── Score bar ────────────────────────────────────────────────────────── */
+  .score-bar-card {
+    flex: 1;
+    min-width: 300px;
+    background: var(--goto-surface-color-default);
+    border-radius: var(--goto-radius-large);
+    border: 1px solid var(--goto-border-color-default);
+    box-shadow: var(--goto-elevation-small);
+    padding: 24px 28px;
+  }
+
+  .score-bar-title {
+    font: var(--goto-body-small-strong);
+    margin-bottom: 16px;
+    color: var(--goto-type-color-secondary);
+  }
+
+  .band-bar-wrap { position: relative; height: 48px; border-radius: 8px; overflow: visible; margin-bottom: 24px; }
+  .band-segments { display: flex; height: 100%; border-radius: 8px; overflow: hidden; }
+  .band-seg {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font: var(--goto-caption-small);
+    color: rgba(255,255,255,.75);
+    font-weight: 600;
+    letter-spacing: .3px;
+    position: relative;
+    transition: flex .3s;
+  }
+  .band-seg-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 4px; }
+
+  .band-needle {
+    position: absolute;
+    top: -10px;
+    width: 2px;
+    height: 68px;
+    background: var(--goto-neutral-800);
+    border-radius: 1px;
+    transition: left .4s cubic-bezier(.4,0,.2,1);
+    pointer-events: none;
+  }
+  .band-needle::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0; height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 6px solid var(--goto-neutral-800);
+  }
+  .needle-score-label {
+    position: absolute;
+    top: -26px;
+    transform: translateX(-50%);
+    font: var(--goto-caption-medium-strong);
+    background: var(--goto-neutral-800);
+    color: #fff;
+    padding: 2px 6px;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+
+  .band-axis {
+    display: flex;
+    justify-content: space-between;
+    font: var(--goto-caption-small);
+    color: var(--goto-type-color-secondary);
+    margin-top: 6px;
+  }
+
+  /* ── Active band highlight ──────────────────────────────────────────── */
+  .active-band-strip {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+  }
+  .band-pill {
+    padding: 4px 12px;
+    border-radius: var(--goto-radius-circle);
+    font: var(--goto-caption-medium-strong);
+    border: 1.5px solid transparent;
+    transition: all .2s;
+    cursor: default;
+  }
+  .band-pill.active {
+    box-shadow: 0 0 0 2px var(--goto-purple-500);
+  }
+
+  /* ── Signal breakdown table ────────────────────────────────────────── */
+  .signals-card {
+    background: var(--goto-surface-color-default);
+    border-radius: var(--goto-radius-large);
+    border: 1px solid var(--goto-border-color-default);
+    box-shadow: var(--goto-elevation-small);
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .signals-card-header {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--goto-border-color-default);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .signals-card-title { font: var(--goto-body-small-strong); }
+  .count-badge {
+    background: var(--goto-neutral-050);
+    border: 1px solid var(--goto-border-color-default);
+    border-radius: var(--goto-radius-circle);
+    font: var(--goto-caption-medium-strong);
+    padding: 1px 7px;
+    color: var(--goto-type-color-secondary);
+  }
+
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    padding: 8px 16px;
+    text-align: left;
+    font: var(--goto-caption-medium-strong);
+    color: var(--goto-type-color-secondary);
+    border-bottom: 1px solid var(--goto-border-color-default);
+    white-space: nowrap;
+  }
+  tbody tr { transition: background .1s; }
+  tbody tr:hover { background: var(--goto-neutral-050); }
+  tbody td {
+    padding: 9px 16px;
+    font: var(--goto-caption-medium);
+    border-bottom: 1px solid var(--goto-border-color-default);
+    vertical-align: middle;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  .td-deduct { font: var(--goto-caption-medium-strong); color: var(--goto-red-500); }
+  .td-weighted { font: var(--goto-caption-medium-strong); color: var(--goto-orange-500); }
+  .td-multiplier { color: var(--goto-type-color-secondary); }
+
+  .empty-state {
+    padding: 28px 20px;
+    text-align: center;
+    font: var(--goto-body-small);
+    color: var(--goto-type-color-secondary);
+  }
+
+  /* ── Scenario presets ────────────────────────────────────────────────── */
+  .scenarios-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .scenario-card {
+    background: var(--goto-surface-color-default);
+    border: 1.5px solid var(--goto-border-color-default);
+    border-radius: var(--goto-radius-medium);
+    padding: 14px;
+    cursor: pointer;
+    transition: border-color .15s, box-shadow .15s, transform .1s;
+    user-select: none;
+  }
+  .scenario-card:hover {
+    border-color: var(--goto-purple-500);
+    box-shadow: 0 0 0 3px var(--goto-surface-color-brand-secondary);
+    transform: translateY(-1px);
+  }
+  .scenario-card.active-scenario {
+    border-color: var(--goto-purple-500);
+    background: var(--goto-surface-color-brand-secondary);
+  }
+  .scenario-name { font: var(--goto-body-small-strong); margin-bottom: 4px; }
+  .scenario-desc { font: var(--goto-caption-medium); color: var(--goto-type-color-secondary); }
+
+  /* ── Edge case log ─────────────────────────────────────────────────── */
+  .edge-log {
+    background: var(--goto-surface-color-default);
+    border-radius: var(--goto-radius-large);
+    border: 1px solid var(--goto-border-color-default);
+    box-shadow: var(--goto-elevation-small);
+    overflow: hidden;
+  }
+  .edge-log-header {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--goto-border-color-default);
+    font: var(--goto-body-small-strong);
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  .edge-log-body { padding: 12px 20px; display: flex; flex-direction: column; gap: 6px; }
+  .log-line {
+    font: var(--goto-caption-medium);
+    padding: 5px 10px;
+    border-radius: var(--goto-radius-small);
+    background: var(--goto-neutral-050);
+    border-left: 3px solid transparent;
+  }
+  .log-info  { border-color: var(--goto-blue-400); }
+  .log-warn  { border-color: var(--goto-orange-300); color: var(--goto-orange-600); }
+  .log-clamp { border-color: var(--goto-red-400); }
+  .log-ok    { border-color: var(--goto-green-400); }
+
+  /* ── Gauge ring animation ────────────────────────────────────────────── */
+  .ring-track { fill: none; stroke: var(--goto-neutral-100); stroke-width: 10; }
+  .ring-fill  { fill: none; stroke-width: 10; stroke-linecap: round; transition: stroke-dashoffset .5s cubic-bezier(.4,0,.2,1), stroke .4s; }
+
+  /* ── Dividers / section labels ───────────────────────────────────────── */
+  .view-section-title {
+    font: var(--goto-caption-medium-strong);
+    color: var(--goto-type-color-secondary);
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    margin-bottom: 12px;
+    margin-top: 4px;
+  }
+
+  /* ── Tooltip ─────────────────────────────────────────────────────────── */
+  [data-tip] { position: relative; }
+  [data-tip]::after {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--goto-neutral-850);
+    color: #fff;
+    font: var(--goto-caption-small);
+    padding: 4px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity .15s;
+    z-index: 100;
+  }
+  [data-tip]:hover::after { opacity: 1; }
+
+  /* ── Animated score change flash ─────────────────────────────────────── */
+  @keyframes flashScore {
+    0%   { transform: scale(1.18); }
+    100% { transform: scale(1); }
+  }
+  .score-flash { animation: flashScore .35s ease-out; }
+
+  /* Scrollbar polish */
+  .controls::-webkit-scrollbar { width: 5px; }
+  .controls::-webkit-scrollbar-track { background: transparent; }
+  .controls::-webkit-scrollbar-thumb { background: var(--goto-neutral-200); border-radius: 10px; }
+
+  /* ── Responsive ──────────────────────────────────────────────────────── */
+  @media (max-width: 860px) {
+    .app { grid-template-columns: 1fr; grid-template-rows: 52px auto 1fr; }
+    .controls { max-height: 300px; border-right: none; border-bottom: 1px solid var(--goto-border-color-default); }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ── Top Bar ─────────────────────────────────────────────────────────── -->
+  <header class="topbar">
+    <div class="topbar-logo">
+      <svg viewBox="0 0 16 16"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 2a5 5 0 110 10A5 5 0 018 3zm0 2a3 3 0 100 6 3 3 0 000-6z"/></svg>
+    </div>
+    <span class="topbar-title">Device Health Score</span>
+    <span class="topbar-sub">— UX Testbed</span>
+    <div class="topbar-spacer"></div>
+    <span class="chip">Phase 1 PDD</span>
+  </header>
+
+  <!-- ── Controls Sidebar ────────────────────────────────────────────────── -->
+  <aside class="controls" id="controls">
+
+    <!-- CDS State -->
+    <div class="section">
+      <div class="section-title">CDS Health State</div>
+      <div class="field">
+        <label>State override <span class="val" id="cds-state-label">all good</span></label>
+        <select id="cds-state">
+          <option value="all_good">all good</option>
+          <option value="needs_attention">needs attention</option>
+          <option value="critical">critical</option>
+          <option value="blocking">blocking</option>
+          <option value="unverified">unverified</option>
+          <option value="provisioning">provisioning</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- CDS Needs Attention deductions -->
+    <div class="section" id="cds-deductions-section" style="display:none">
+      <div class="section-title">CDS Deductions (needs attention)</div>
+      <div class="checkbox-group">
+        <label class="checkbox-item">
+          <input type="checkbox" id="cds-missing-mac-1" data-cds-penalty="2">
+          <div class="signal-info">
+            <div class="signal-name">Missing Mac permission #1</div>
+            <div class="signal-meta">−2 pts each</div>
+          </div>
+        </label>
+        <label class="checkbox-item">
+          <input type="checkbox" id="cds-missing-mac-2" data-cds-penalty="2">
+          <div class="signal-info">
+            <div class="signal-name">Missing Mac permission #2</div>
+            <div class="signal-meta">−2 pts each</div>
+          </div>
+        </label>
+        <label class="checkbox-item">
+          <input type="checkbox" id="cds-alerts" data-cds-penalty="3">
+          <div class="signal-info">
+            <div class="signal-name">alerts.alertCount &gt; 0</div>
+            <div class="signal-meta">−3 pts</div>
+          </div>
+        </label>
+        <label class="checkbox-item">
+          <input type="checkbox" id="cds-av-outdated" data-cds-penalty="4">
+          <div class="signal-info">
+            <div class="signal-name">AV definitions outdated</div>
+            <div class="signal-meta">−4 pts</div>
+          </div>
+        </label>
+        <label class="checkbox-item">
+          <input type="checkbox" id="cds-epp-expired" data-cds-penalty="4">
+          <div class="signal-info">
+            <div class="signal-name">GTRe EPP license expired</div>
+            <div class="signal-meta">−4 pts</div>
+          </div>
+        </label>
+      </div>
+    </div>
+
+    <!-- Phase 1 PDD Signals -->
+    <div class="section">
+      <div class="section-title">Phase 1 PDD Signals</div>
+      <div class="checkbox-group" id="pdd-signals">
+        <!-- JS populated -->
+      </div>
+    </div>
+
+    <!-- Diminishing returns weights -->
+    <div class="section">
+      <div class="section-title">Diminishing Returns Weights</div>
+      <div class="weight-row">
+        <span class="wlabel">1st</span>
+        <input type="range" id="w1" min="0.1" max="1.5" step="0.05" value="1.0">
+        <span class="wval" id="w1-val">1.0×</span>
+      </div>
+      <div class="weight-row">
+        <span class="wlabel">2nd</span>
+        <input type="range" id="w2" min="0.1" max="1.0" step="0.05" value="0.7">
+        <span class="wval" id="w2-val">0.7×</span>
+      </div>
+      <div class="weight-row">
+        <span class="wlabel">3rd</span>
+        <input type="range" id="w3" min="0.1" max="0.9" step="0.05" value="0.5">
+        <span class="wval" id="w3-val">0.5×</span>
+      </div>
+      <div class="weight-row">
+        <span class="wlabel">4th+</span>
+        <input type="range" id="w4" min="0.05" max="0.6" step="0.05" value="0.35">
+        <span class="wval" id="w4-val">0.35×</span>
+      </div>
+    </div>
+
+    <!-- Custom severity penalties -->
+    <div class="section">
+      <div class="section-title">Severity Penalty Values</div>
+      <div class="penalty-row">
+        <label>Medium penalty</label>
+        <input type="number" id="pen-medium" value="4" min="0" max="30">
+      </div>
+      <div class="penalty-row">
+        <label>High penalty</label>
+        <input type="number" id="pen-high" value="9" min="0" max="30">
+      </div>
+      <div class="penalty-row">
+        <label>Critical penalty</label>
+        <input type="number" id="pen-critical" value="18" min="0" max="30">
+      </div>
+    </div>
+
+    <!-- CDS Needs Attention band cap -->
+    <div class="section">
+      <div class="section-title">CDS NA Band Cap</div>
+      <div class="field">
+        <label>Max CDS deductions <span class="val" id="na-cap-val">−10</span></label>
+        <input type="range" id="na-cap" min="0" max="30" step="1" value="10">
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="section">
+      <div class="btn-row">
+        <button class="btn btn-secondary" id="btn-reset">Reset</button>
+        <button class="btn btn-primary" id="btn-worst">Worst case</button>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- ── Main View ─────────────────────────────────────────────────────────── -->
+  <main class="main" id="main">
+
+    <!-- Scenario Presets -->
+    <div class="view-section-title">Scenario Presets</div>
+    <div class="scenarios-grid" id="scenarios-grid"></div>
+
+    <!-- Score Hero -->
+    <div class="view-section-title">Live Score</div>
+    <div class="score-hero">
+
+      <!-- Ring + breakdown -->
+      <div class="score-card">
+        <div class="score-ring-wrap">
+          <svg viewBox="0 0 120 120" id="score-svg">
+            <circle class="ring-track" cx="60" cy="60" r="50"/>
+            <circle class="ring-fill" id="ring-fill" cx="60" cy="60" r="50"
+              stroke-dasharray="314.16"
+              stroke-dashoffset="314.16"
+              transform="rotate(-90 60 60)"
+              stroke="#8552F6"/>
+          </svg>
+          <div class="score-ring-text">
+            <span class="score-number" id="score-number">—</span>
+            <span class="score-label">/ 100</span>
+          </div>
+        </div>
+
+        <div class="score-details">
+          <div class="score-state">
+            <span class="state-dot" id="state-dot"></span>
+            <span id="state-label">—</span>
+          </div>
+          <div class="score-band-label" id="band-range-label">Band: —</div>
+          <div class="breakdown-list">
+            <div class="breakdown-item">
+              <span class="bk-label">Band start</span>
+              <span class="bk-val bk-start" id="bkd-start">—</span>
+            </div>
+            <div class="breakdown-item">
+              <span class="bk-label">CDS deductions</span>
+              <span class="bk-val bk-deduct" id="bkd-cds">—</span>
+            </div>
+            <div class="breakdown-item">
+              <span class="bk-label">PDD deductions</span>
+              <span class="bk-val bk-deduct" id="bkd-pdd">—</span>
+            </div>
+            <div class="breakdown-item">
+              <span class="bk-label">Raw score</span>
+              <span class="bk-val" id="bkd-raw">—</span>
+            </div>
+            <div class="breakdown-item">
+              <span class="bk-label">After clamp</span>
+              <span class="bk-val bk-start" id="bkd-final">—</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Band bar visualization -->
+      <div class="score-bar-card">
+        <div class="score-bar-title">Score bands &amp; position</div>
+        <div class="band-bar-wrap" id="band-bar-wrap">
+          <div class="band-segments" id="band-segments"></div>
+          <div class="band-needle" id="band-needle">
+            <div class="needle-score-label" id="needle-score-label">—</div>
+          </div>
+        </div>
+        <div class="band-axis">
+          <span>0</span><span>10</span><span>20</span><span>35</span><span>49</span><span>60</span><span>69</span><span>70</span><span>85</span><span>89</span><span>100</span>
+        </div>
+        <div class="active-band-strip" id="band-pills"></div>
+      </div>
+
+    </div>
+
+    <!-- PDD Signal Breakdown Table -->
+    <div class="view-section-title">PDD Signal Breakdown</div>
+    <div class="signals-card">
+      <div class="signals-card-header">
+        <span class="signals-card-title">Active Phase 1 PDD signals</span>
+        <span class="count-badge" id="signal-count">0</span>
+      </div>
+      <div id="signals-table-wrap">
+        <div class="empty-state">No PDD signals active — enable signals in the left panel.</div>
+      </div>
+    </div>
+
+    <!-- Edge Case / Calculation Log -->
+    <div class="view-section-title">Calculation Log</div>
+    <div class="edge-log">
+      <div class="edge-log-header">
+        Step-by-step scoring trace
+        <span class="count-badge" id="log-count">0</span>
+      </div>
+      <div class="edge-log-body" id="log-body"></div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+/* =====================================================================
+   DATA — from phase1-health-score-draft-v1.md
+   ===================================================================== */
+const CDS_BANDS = {
+  all_good:        { min: 85, max: 100, start: 100, label: 'all good',        color: '#1b8756' },
+  needs_attention: { min: 70, max: 89,  start: 89,  label: 'needs attention', color: '#b35f17' },
+  critical:        { min: 35, max: 69,  start: 69,  label: 'critical',        color: '#d12f3a' },
+  blocking:        { min: 10, max: 39,  start: 39,  label: 'blocking',        color: '#901519' },
+  unverified:      { min: 20, max: 49,  start: 49,  label: 'unverified',      color: '#7833a0' },
+  provisioning:    { min: 60, max: 85,  start: 85,  label: 'provisioning',    color: '#2c72de' },
+};
+
+const PDD_SIGNALS = [
+  { id: 'app_error',      name: 'Application Error (1000)',            severity: 'high',     event: 'Win Event 1000' },
+  { id: 'app_hang',       name: 'Application Hang (1002)',             severity: 'medium',   event: 'Win Event 1002' },
+  { id: 'svc_terminated', name: 'Service terminated (7031)',           severity: 'high',     event: 'Win Event 7031' },
+  { id: 'kernel_power',   name: 'Kernel-Power unexpected shutdown (41)',severity: 'critical', event: 'Win Event 41' },
+  { id: 'bsod',           name: 'BugCheck / BSOD (1001)',              severity: 'critical', event: 'Win Event 1001' },
+  { id: 'win_update',     name: 'WindowsUpdateClient failure (20)',    severity: 'high',     event: 'Win Event 20' },
+  { id: 'defender',       name: 'Defender remediation failure (1119)', severity: 'critical', event: 'Win Event 1119' },
+  { id: 'wlan',           name: 'WLAN authentication failure (8003)',  severity: 'high',     event: 'Win Event 8003' },
+  { id: 'dhcp',           name: 'DHCP lease failure (1001)',           severity: 'high',     event: 'Win Event 1001' },
+  { id: 'cpu',            name: 'CPU > 80%',                           severity: 'medium',   event: 'Metric alert' },
+  { id: 'memory',         name: 'Memory > 85%',                        severity: 'medium',   event: 'Metric alert' },
+  { id: 'disk',           name: 'Disk < 5 GB free',                    severity: 'high',     event: 'Metric alert' },
+  { id: 'boot',           name: 'Boot > 120 sec',                      severity: 'medium',   event: 'Metric alert' },
+];
+
+const SCENARIOS = [
+  {
+    id: 'perfect',
+    name: 'Perfect device',
+    desc: 'No issues at all — score should hit 100',
+    state: 'all_good',
+    pdd: [],
+    cds: {},
+  },
+  {
+    id: 'slow_boot',
+    name: 'Slightly slow boot',
+    desc: 'Single medium PDD signal — minor dip',
+    state: 'all_good',
+    pdd: ['boot'],
+    cds: {},
+  },
+  {
+    id: 'multi_pdd',
+    name: 'Disk + CPU + RAM',
+    desc: 'Three PDD signals — diminishing returns test',
+    state: 'all_good',
+    pdd: ['disk', 'cpu', 'memory'],
+    cds: {},
+  },
+  {
+    id: 'bsod_only',
+    name: 'BSOD (no other issues)',
+    desc: 'Single critical PDD in all good band',
+    state: 'all_good',
+    pdd: ['bsod'],
+    cds: {},
+  },
+  {
+    id: 'needs_attention_mild',
+    name: 'Needs attention (mild)',
+    desc: 'NA state + minor CDS deductions',
+    state: 'needs_attention',
+    pdd: [],
+    cds: { 'cds-alerts': true, 'cds-av-outdated': true },
+  },
+  {
+    id: 'needs_attention_clamp',
+    name: 'NA clamped to floor',
+    desc: 'Severe PDD signals inside NA band — clamp activates',
+    state: 'needs_attention',
+    pdd: ['kernel_power', 'win_update', 'disk'],
+    cds: { 'cds-alerts': true, 'cds-av-outdated': true },
+  },
+  {
+    id: 'critical_state',
+    name: 'Critical state',
+    desc: 'CDS critical + several PDD signals',
+    state: 'critical',
+    pdd: ['bsod', 'defender', 'wlan'],
+    cds: {},
+  },
+  {
+    id: 'blocking',
+    name: 'Blocking',
+    desc: 'Trust / duplication issue — lowest active band',
+    state: 'blocking',
+    pdd: ['cpu'],
+    cds: {},
+  },
+  {
+    id: 'unverified',
+    name: 'Unverified',
+    desc: 'Premium/verification failure band',
+    state: 'unverified',
+    pdd: ['boot', 'memory'],
+    cds: {},
+  },
+  {
+    id: 'provisioning',
+    name: 'Provisioning',
+    desc: 'New device — missing hostname band',
+    state: 'provisioning',
+    pdd: [],
+    cds: {},
+  },
+  {
+    id: 'worst',
+    name: 'Worst case',
+    desc: 'All signals active in all good band',
+    state: 'all_good',
+    pdd: PDD_SIGNALS.map(s => s.id),
+    cds: {},
+  },
+  {
+    id: 'edge_floor',
+    name: 'Edge: floor hit',
+    desc: 'Needs attention clamped hard to 70',
+    state: 'needs_attention',
+    pdd: PDD_SIGNALS.map(s => s.id),
+    cds: { 'cds-alerts': true, 'cds-av-outdated': true, 'cds-epp-expired': true, 'cds-missing-mac-1': true, 'cds-missing-mac-2': true },
+  },
+];
+
+/* =====================================================================
+   DOM SETUP
+   ===================================================================== */
+function buildPDDCheckboxes() {
+  const wrap = document.getElementById('pdd-signals');
+  wrap.innerHTML = '';
+  PDD_SIGNALS.forEach(sig => {
+    const sev = sig.severity;
+    const label = document.createElement('label');
+    label.className = 'checkbox-item';
+    label.innerHTML = `
+      <input type="checkbox" id="pdd-${sig.id}" data-pdd-id="${sig.id}">
+      <div class="signal-info">
+        <div class="signal-name">
+          ${sig.name}
+          <span class="severity-badge sev-${sev}">${sev}</span>
+        </div>
+        <div class="signal-meta">${sig.event}</div>
+      </div>`;
+    wrap.appendChild(label);
+    label.querySelector('input').addEventListener('change', recalc);
+  });
+}
+
+function buildBandSegments() {
+  const wrap = document.getElementById('band-segments');
+  // We draw the full 0-100 bar, each band colored over its range
+  // Use all 6 bands overlaid as absolute positioned strips
+  const FULL_BANDS = [
+    { key: 'blocking',        min: 10, max: 39,  color: '#901519' },
+    { key: 'unverified',      min: 20, max: 49,  color: '#7833a0' },
+    { key: 'critical',        min: 35, max: 69,  color: '#d12f3a' },
+    { key: 'provisioning',    min: 60, max: 85,  color: '#2c72de' },
+    { key: 'needs_attention', min: 70, max: 89,  color: '#b35f17' },
+    { key: 'all_good',        min: 85, max: 100, color: '#1b8756' },
+  ];
+  // Simpler: render a gradient bar split into named zones (0-10 gray, etc.)
+  wrap.style.position = 'relative';
+  wrap.innerHTML = '';
+  const zones = [
+    { from: 0,  to: 10,  color: '#ccc',    label: '0–10' },
+    { from: 10, to: 20,  color: '#901519', label: 'blocking' },
+    { from: 20, to: 35,  color: '#7833a0', label: 'unverified' },
+    { from: 35, to: 49,  color: '#c84b55', label: 'critical / unverified' },
+    { from: 49, to: 60,  color: '#d12f3a', label: 'critical' },
+    { from: 60, to: 69,  color: '#e05a20', label: 'critical / provisioning' },
+    { from: 69, to: 70,  color: '#b87820', label: 'needs attention / provisioning' },
+    { from: 70, to: 85,  color: '#b35f17', label: 'needs attention' },
+    { from: 85, to: 89,  color: '#5a8c3a', label: 'all good / needs attention' },
+    { from: 89, to: 100, color: '#1b8756', label: 'all good' },
+  ];
+  zones.forEach(z => {
+    const w = (z.to - z.from);
+    const div = document.createElement('div');
+    div.className = 'band-seg';
+    div.style.width = `${w}%`;
+    div.style.background = z.color;
+    div.title = `${z.label} (${z.from}–${z.to})`;
+    wrap.appendChild(div);
+  });
+}
+
+function buildBandPills() {
+  const wrap = document.getElementById('band-pills');
+  wrap.innerHTML = '';
+  Object.entries(CDS_BANDS).forEach(([key, band]) => {
+    const pill = document.createElement('div');
+    pill.className = 'band-pill';
+    pill.id = `pill-${key}`;
+    pill.style.background = band.color + '18';
+    pill.style.borderColor = band.color + '55';
+    pill.style.color = band.color;
+    pill.textContent = `${band.label} (${band.min}–${band.max})`;
+    wrap.appendChild(pill);
+  });
+}
+
+function buildScenarioCards() {
+  const grid = document.getElementById('scenarios-grid');
+  grid.innerHTML = '';
+  SCENARIOS.forEach(s => {
+    const card = document.createElement('div');
+    card.className = 'scenario-card';
+    card.id = `scenario-${s.id}`;
+    card.innerHTML = `<div class="scenario-name">${s.name}</div><div class="scenario-desc">${s.desc}</div>`;
+    card.addEventListener('click', () => loadScenario(s));
+    grid.appendChild(card);
+  });
+}
+
+/* =====================================================================
+   SCORING ENGINE
+   ===================================================================== */
+function getPenalty(severity) {
+  const m = parseFloat(document.getElementById('pen-medium').value) || 4;
+  const h = parseFloat(document.getElementById('pen-high').value) || 9;
+  const c = parseFloat(document.getElementById('pen-critical').value) || 18;
+  return { medium: m, high: h, critical: c }[severity] || 0;
+}
+
+function getWeights() {
+  return [
+    parseFloat(document.getElementById('w1').value),
+    parseFloat(document.getElementById('w2').value),
+    parseFloat(document.getElementById('w3').value),
+    parseFloat(document.getElementById('w4').value),
+  ];
+}
+
+function getActivePDDSignals() {
+  return PDD_SIGNALS.filter(sig => {
+    const el = document.getElementById(`pdd-${sig.id}`);
+    return el && el.checked;
+  });
+}
+
+function getCDSDeduction(state) {
+  if (state !== 'needs_attention') return 0;
+  const cap = parseInt(document.getElementById('na-cap').value) || 10;
+  let total = 0;
+  document.querySelectorAll('[data-cds-penalty]').forEach(el => {
+    if (el.checked) total += parseInt(el.dataset.cdsPenalty);
+  });
+  return Math.min(total, cap);
+}
+
+function calcScore() {
+  const state = document.getElementById('cds-state').value;
+  const band = CDS_BANDS[state];
+  const weights = getWeights();
+  const activeSigs = getActivePDDSignals();
+  const logs = [];
+  const signals = [];
+
+  // Sort penalties descending
+  const penalties = activeSigs.map(sig => ({
+    ...sig,
+    basePenalty: getPenalty(sig.severity),
+  })).sort((a, b) => b.basePenalty - a.basePenalty);
+
+  // Apply diminishing returns
+  let pddTotal = 0;
+  penalties.forEach((sig, i) => {
+    const multiplier = i < 4 ? weights[i] : weights[3];
+    const weighted = sig.basePenalty * multiplier;
+    pddTotal += weighted;
+    signals.push({ ...sig, multiplier: multiplier.toFixed(2), weighted: weighted.toFixed(1) });
+  });
+
+  const cdsDeduction = getCDSDeduction(state);
+  const rawScore = band.start - cdsDeduction - pddTotal;
+  const clamped = Math.max(band.min, Math.min(band.max, rawScore));
+  const final = Math.round(clamped);
+  const clampWasActive = rawScore !== clamped;
+
+  // Build log
+  logs.push({ type: 'info', msg: `CDS state → <strong>${band.label}</strong>. Band: ${band.min}–${band.max}. Start: ${band.start}.` });
+  if (cdsDeduction > 0) {
+    logs.push({ type: 'warn', msg: `CDS needs-attention deductions: −${cdsDeduction} pts (cap: −${document.getElementById('na-cap').value}).` });
+  }
+  if (signals.length === 0) {
+    logs.push({ type: 'ok', msg: 'No PDD signals active — no PDD deductions.' });
+  } else {
+    logs.push({ type: 'info', msg: `PDD signals sorted by penalty: [${penalties.map(s => s.basePenalty).join(', ')}].` });
+    signals.forEach((s, i) => {
+      logs.push({ type: 'info', msg: `${i+1}. <strong>${s.name}</strong> [${s.severity}] −${s.basePenalty} × ${s.multiplier} = −${s.weighted}` });
+    });
+    logs.push({ type: 'warn', msg: `Total PDD deduction: −${pddTotal.toFixed(1)} pts.` });
+  }
+  logs.push({ type: 'info', msg: `Raw score = ${band.start} − ${cdsDeduction} − ${pddTotal.toFixed(1)} = ${rawScore.toFixed(1)}` });
+  if (clampWasActive) {
+    if (rawScore < band.min) {
+      logs.push({ type: 'clamp', msg: `⚠ Clamp activated: raw ${rawScore.toFixed(1)} &lt; band floor ${band.min}. Score floored at <strong>${band.min}</strong>.` });
+    } else {
+      logs.push({ type: 'clamp', msg: `⚠ Clamp activated: raw ${rawScore.toFixed(1)} &gt; band ceiling ${band.max}. Score capped at <strong>${band.max}</strong>.` });
+    }
+  } else {
+    logs.push({ type: 'ok', msg: `No clamping needed — raw score ${rawScore.toFixed(1)} is within band.` });
+  }
+  logs.push({ type: 'ok', msg: `Final score: <strong>${final}</strong> / 100` });
+
+  return { state, band, final, cdsDeduction, pddTotal: pddTotal.toFixed(1), rawScore: rawScore.toFixed(1), clamped, signals, logs };
+}
+
+/* =====================================================================
+   RENDER
+   ===================================================================== */
+let _lastScore = null;
+
+function recalc() {
+  const result = calcScore();
+  renderScore(result);
+  renderSignalsTable(result);
+  renderLog(result);
+  updateBandPills(result);
+  updateNeedle(result);
+}
+
+function renderScore(r) {
+  const scoreEl = document.getElementById('score-number');
+  const prevScore = _lastScore;
+  _lastScore = r.final;
+
+  scoreEl.textContent = r.final;
+  scoreEl.style.color = r.band.color;
+
+  if (prevScore !== null && prevScore !== r.final) {
+    scoreEl.classList.remove('score-flash');
+    void scoreEl.offsetWidth; // reflow
+    scoreEl.classList.add('score-flash');
+  }
+
+  // Ring
+  const circumference = 314.16;
+  const offset = circumference - (r.final / 100) * circumference;
+  const ring = document.getElementById('ring-fill');
+  ring.style.strokeDashoffset = offset;
+  ring.style.stroke = r.band.color;
+
+  // State dot + label
+  document.getElementById('state-dot').style.background = r.band.color;
+  document.getElementById('state-label').textContent = r.band.label;
+  document.getElementById('band-range-label').textContent = `Band: ${r.band.min}–${r.band.max}`;
+
+  // Breakdown
+  document.getElementById('bkd-start').textContent = r.band.start;
+  document.getElementById('bkd-cds').textContent = r.cdsDeduction > 0 ? `−${r.cdsDeduction}` : '—';
+  document.getElementById('bkd-pdd').textContent = parseFloat(r.pddTotal) > 0 ? `−${r.pddTotal}` : '—';
+  document.getElementById('bkd-raw').textContent = r.rawScore;
+  document.getElementById('bkd-final').textContent = r.final;
+}
+
+function renderSignalsTable(r) {
+  const wrap = document.getElementById('signals-table-wrap');
+  document.getElementById('signal-count').textContent = r.signals.length;
+
+  if (r.signals.length === 0) {
+    wrap.innerHTML = '<div class="empty-state">No PDD signals active — enable signals in the left panel.</div>';
+    return;
+  }
+
+  let html = `<table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Signal</th>
+        <th>Severity</th>
+        <th>Event</th>
+        <th style="text-align:right">Base penalty</th>
+        <th style="text-align:right">Multiplier</th>
+        <th style="text-align:right">Weighted</th>
+      </tr>
+    </thead>
+    <tbody>`;
+  r.signals.forEach((s, i) => {
+    html += `<tr>
+      <td>${i + 1}</td>
+      <td>${s.name}</td>
+      <td><span class="severity-badge sev-${s.severity}">${s.severity}</span></td>
+      <td>${s.event}</td>
+      <td class="td-deduct" style="text-align:right">−${s.basePenalty}</td>
+      <td class="td-multiplier" style="text-align:right">${s.multiplier}×</td>
+      <td class="td-weighted" style="text-align:right">−${s.weighted}</td>
+    </tr>`;
+  });
+  html += `<tr>
+    <td colspan="6" style="text-align:right;font-weight:600;padding-right:16px;color:var(--goto-type-color-secondary)">Total PDD deduction</td>
+    <td class="td-deduct" style="text-align:right;font-weight:700">−${r.pddTotal}</td>
+  </tr>`;
+  html += '</tbody></table>';
+  wrap.innerHTML = html;
+}
+
+function renderLog(r) {
+  const body = document.getElementById('log-body');
+  document.getElementById('log-count').textContent = r.logs.length;
+  body.innerHTML = r.logs.map(l =>
+    `<div class="log-line log-${l.type}">${l.msg}</div>`
+  ).join('');
+}
+
+function updateBandPills(r) {
+  Object.keys(CDS_BANDS).forEach(key => {
+    const pill = document.getElementById(`pill-${key}`);
+    if (!pill) return;
+    pill.classList.toggle('active', key === r.state);
+  });
+}
+
+function updateNeedle(r) {
+  const needle = document.getElementById('band-needle');
+  const label = document.getElementById('needle-score-label');
+  const pct = r.final; // 0-100 maps to 0-100% of the bar
+  needle.style.left = `${pct}%`;
+  label.textContent = r.final;
+}
+
+/* =====================================================================
+   SCENARIOS
+   ===================================================================== */
+function loadScenario(s) {
+  // Mark active card
+  document.querySelectorAll('.scenario-card').forEach(c => c.classList.remove('active-scenario'));
+  const card = document.getElementById(`scenario-${s.id}`);
+  if (card) card.classList.add('active-scenario');
+
+  // Set CDS state
+  document.getElementById('cds-state').value = s.state;
+  syncCDSStateLabel();
+  toggleCDSDeductionsSection();
+
+  // Uncheck all PDD
+  PDD_SIGNALS.forEach(sig => {
+    const el = document.getElementById(`pdd-${sig.id}`);
+    if (el) el.checked = false;
+  });
+  // Check scenario PDD
+  (s.pdd || []).forEach(id => {
+    const el = document.getElementById(`pdd-${id}`);
+    if (el) el.checked = true;
+  });
+
+  // CDS deductions
+  ['cds-missing-mac-1', 'cds-missing-mac-2', 'cds-alerts', 'cds-av-outdated', 'cds-epp-expired'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.checked = !!(s.cds && s.cds[id]);
+  });
+
+  recalc();
+}
+
+/* =====================================================================
+   CONTROLS WIRING
+   ===================================================================== */
+function syncCDSStateLabel() {
+  const sel = document.getElementById('cds-state');
+  document.getElementById('cds-state-label').textContent = sel.options[sel.selectedIndex].text;
+}
+
+function toggleCDSDeductionsSection() {
+  const state = document.getElementById('cds-state').value;
+  document.getElementById('cds-deductions-section').style.display =
+    state === 'needs_attention' ? '' : 'none';
+}
+
+function bindWeightSlider(id, valId) {
+  const s = document.getElementById(id);
+  const v = document.getElementById(valId);
+  s.addEventListener('input', () => { v.textContent = parseFloat(s.value).toFixed(2) + '×'; recalc(); });
+}
+
+function init() {
+  buildPDDCheckboxes();
+  buildBandSegments();
+  buildBandPills();
+  buildScenarioCards();
+
+  document.getElementById('cds-state').addEventListener('change', () => {
+    syncCDSStateLabel();
+    toggleCDSDeductionsSection();
+    recalc();
+  });
+
+  document.querySelectorAll('[data-cds-penalty]').forEach(el =>
+    el.addEventListener('change', recalc)
+  );
+
+  document.getElementById('na-cap').addEventListener('input', () => {
+    document.getElementById('na-cap-val').textContent = '−' + document.getElementById('na-cap').value;
+    recalc();
+  });
+
+  bindWeightSlider('w1', 'w1-val');
+  bindWeightSlider('w2', 'w2-val');
+  bindWeightSlider('w3', 'w3-val');
+  bindWeightSlider('w4', 'w4-val');
+
+  document.getElementById('pen-medium').addEventListener('input', recalc);
+  document.getElementById('pen-high').addEventListener('input', recalc);
+  document.getElementById('pen-critical').addEventListener('input', recalc);
+
+  document.getElementById('btn-reset').addEventListener('click', () => {
+    document.querySelectorAll('.scenario-card').forEach(c => c.classList.remove('active-scenario'));
+    loadScenario(SCENARIOS[0]); // perfect device
+  });
+
+  document.getElementById('btn-worst').addEventListener('click', () => {
+    const worst = SCENARIOS.find(s => s.id === 'worst');
+    if (worst) loadScenario(worst);
+  });
+
+  // Initial load
+  loadScenario(SCENARIOS[0]);
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>

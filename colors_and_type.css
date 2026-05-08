@@ -1,0 +1,409 @@
+/* Chameleon Design System — Colors & Type
+   Source: chameleon/packages/chameleon-core/tokens/
+   Brand skin: "resolve" (the newest, most modern skin; GoTo brand)
+   Brand color: #8552F6 (purple-500)
+
+   Fonts: Chameleon ships no webfonts — it uses the OS system stack.
+   This file declares both raw primitives and semantic tokens.
+*/
+
+@font-face {
+  font-family: 'SF Pro Display';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('fonts/SF-Pro-Display-Regular.otf') format('opentype');
+}
+@font-face {
+  font-family: 'SF Pro Display';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('fonts/SF-Pro-Display-Semibold.otf') format('opentype');
+}
+/* No Bold file supplied — reuse Semibold for 700 so heading-xlarge/large render
+   as SF Pro rather than falling back or synth-bolding. Replace when Bold arrives. */
+@font-face {
+  font-family: 'SF Pro Display';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('fonts/SF-Pro-Display-Semibold.otf') format('opentype');
+}
+
+:root {
+  /* ========================================================================
+     FONT FAMILIES — from tokens/typography.json
+     Chameleon deliberately uses the native system stack for performance + OS fidelity.
+     On Apple platforms -apple-system resolves to SF Pro; on other platforms we
+     serve SF Pro Display (OTF) explicitly via @font-face below so the brand
+     renders consistently everywhere. Only Regular (400) + Semibold (600) are
+     provided — 700 reuses the Semibold file as a near-match (flag for user).
+     ======================================================================== */
+  --goto-font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont,
+    'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
+  --goto-font-family-mono: Menlo, Consolas, Monaco, 'Liberation Mono',
+    'Lucida Console', monospace;
+
+  /* ========================================================================
+     TYPOGRAPHY TOKENS (font shorthand: weight size/lineHeight family)
+     ======================================================================== */
+  --goto-heading-xlarge:       700 3rem/3.25rem var(--goto-font-family);     /* 48/52 */
+  --goto-heading-large:        700 2.25rem/2.5rem var(--goto-font-family);   /* 36/40 */
+  --goto-heading-medium:       600 1.75rem/2rem var(--goto-font-family);     /* 28/32 */
+  --goto-heading-small:        600 1.25rem/1.5rem var(--goto-font-family);   /* 20/24 */
+
+  --goto-body-large:           400 1.125rem/1.5rem var(--goto-font-family);  /* 18/24 */
+  --goto-body-large-strong:    600 1.125rem/1.5rem var(--goto-font-family);
+  --goto-body-medium:          400 1rem/1.5rem var(--goto-font-family);      /* 16/24 */
+  --goto-body-medium-strong:   600 1rem/1.5rem var(--goto-font-family);
+  --goto-body-small:           400 0.875rem/1.5rem var(--goto-font-family);  /* 14/24 */
+  --goto-body-small-strong:    600 0.875rem/1.5rem var(--goto-font-family);
+
+  --goto-caption-medium:        400 0.75rem/1.25rem var(--goto-font-family); /* 12/20 */
+  --goto-caption-medium-strong: 600 0.75rem/1.25rem var(--goto-font-family);
+  --goto-caption-small:         400 0.625rem/1rem var(--goto-font-family);   /* 10/16 */
+  --goto-caption-small-strong:  600 0.625rem/1rem var(--goto-font-family);
+
+  --goto-button-xlarge: 600 1.125rem/1.5rem var(--goto-font-family);
+  --goto-button-large:  600 1rem/1.5rem var(--goto-font-family);
+  --goto-button-medium: 600 0.875rem/1.5rem var(--goto-font-family);
+  --goto-button-small:  600 0.75rem/1.25rem var(--goto-font-family);
+
+  --goto-code-medium: 400 0.875rem/1.5rem var(--goto-font-family-mono);
+  --goto-code-small:  400 0.75rem/1.25rem var(--goto-font-family-mono);
+
+  /* ========================================================================
+     PRIMITIVE COLORS — from tokens/base.json (the resolve/rebranded palette)
+     9-stop ramps. Use these only when a semantic token doesn't fit.
+     ======================================================================== */
+  --goto-blue-100: rgb(232, 240, 253);
+  --goto-blue-200: rgb(185, 209, 245);
+  --goto-blue-300: rgb(138, 177, 237);
+  --goto-blue-400: rgb(93, 148, 230);
+  --goto-blue-500: rgb(44, 114, 222);
+  --goto-blue-600: rgb(36, 93, 181);
+  --goto-blue-700: rgb(27, 72, 140);
+  --goto-blue-800: rgb(18, 50, 99);
+  --goto-blue-900: rgb(9, 28, 57);
+
+  --goto-green-100: rgb(235, 249, 243);
+  --goto-green-200: rgb(183, 220, 203);
+  --goto-green-300: rgb(131, 192, 165);
+  --goto-green-400: rgb(80, 164, 126);
+  --goto-green-500: rgb(27, 135, 86);
+  --goto-green-600: rgb(24, 113, 73);
+  --goto-green-700: rgb(21, 90, 59);
+  --goto-green-800: rgb(17, 67, 45);
+  --goto-green-900: rgb(13, 43, 29);
+
+  --goto-purple-100: rgb(242, 237, 253);
+  --goto-purple-200: rgb(215, 198, 251);
+  --goto-purple-300: rgb(188, 160, 249);
+  --goto-purple-400: rgb(161, 121, 248);
+  --goto-purple-500: rgb(133, 82, 246);   /* BRAND */
+  --goto-purple-600: rgb(106, 64, 198);
+  --goto-purple-700: rgb(80, 47, 151);
+  --goto-purple-800: rgb(53, 29, 104);
+  --goto-purple-900: rgb(25, 10, 56);
+
+  --goto-red-100: rgb(252, 237, 238);
+  --goto-red-200: rgb(241, 189, 193);
+  --goto-red-300: rgb(230, 141, 147);
+  --goto-red-400: rgb(220, 95, 103);
+  --goto-red-500: rgb(209, 47, 58);
+  --goto-red-600: rgb(170, 37, 46);
+  --goto-red-700: rgb(131, 28, 35);
+  --goto-red-800: rgb(93, 19, 24);
+  --goto-red-900: rgb(53, 9, 12);
+
+  --goto-orange-100: rgb(254, 237, 222);
+  --goto-orange-200: rgb(255, 196, 140);
+  --goto-orange-300: rgb(246, 141, 46);
+  --goto-orange-400: rgb(219, 120, 28);
+  --goto-orange-500: rgb(179, 95, 17);
+  --goto-orange-600: rgb(140, 68, 0);
+  --goto-orange-700: rgb(112, 60, 10);
+
+  --goto-yellow-100: rgb(255, 253, 169);
+  --goto-yellow-200: rgb(255, 251, 123);
+  --goto-yellow-300: rgb(242, 221, 6);
+  --goto-yellow-400: rgb(214, 194, 18);
+  --goto-yellow-500: rgb(165, 148, 30);
+  --goto-yellow-600: rgb(134, 117, 28);
+  --goto-yellow-700: rgb(104, 87, 20);
+
+  --goto-neutral-000: rgb(255, 255, 255);
+  --goto-neutral-050: rgb(242, 246, 247);
+  --goto-neutral-100: rgb(217, 227, 233);
+  --goto-neutral-200: rgb(195, 212, 222);
+  --goto-neutral-300: rgb(152, 182, 201);
+  --goto-neutral-400: rgb(115, 153, 175);
+  --goto-neutral-500: rgb(88, 121, 143);
+  --goto-neutral-600: rgb(70, 91, 107);
+  --goto-neutral-700: rgb(49, 62, 73);
+  --goto-neutral-800: rgb(34, 41, 46);
+  --goto-neutral-850: rgb(23, 27, 31);
+  --goto-neutral-900: rgb(0, 0, 0);
+
+  /* ========================================================================
+     SEMANTIC TOKENS — light theme (from tokens/resolve.json)
+     Override the whole block inside [data-theme="dark"] for dark theme.
+     ======================================================================== */
+
+  /* Backgrounds */
+  --goto-background-color-default:    var(--goto-neutral-000);        /* page */
+  --goto-background-color-secondary:  rgb(247, 247, 247);             /* subtle surface */
+
+  /* Type (foreground) */
+  --goto-type-color-default:    rgb(0, 0, 0);
+  --goto-type-color-secondary:  rgb(70, 91, 107);                     /* neutral-600 */
+  --goto-type-color-placeholder:rgba(0, 0, 0, 0.55);
+  --goto-type-color-disabled:   rgba(0, 0, 0, 0.3);
+  --goto-type-color-brand:      var(--goto-purple-500);
+  --goto-type-color-danger:     var(--goto-red-500);
+  --goto-type-color-success:    var(--goto-green-500);
+  --goto-type-color-warning:    var(--goto-yellow-500);
+
+  /* Icons */
+  --goto-icon-color-default:    var(--goto-neutral-700);
+  --goto-icon-color-secondary:  var(--goto-neutral-500);
+  --goto-icon-color-brand:      var(--goto-purple-500);
+  --goto-icon-color-disabled:   rgba(0, 0, 0, 0.3);
+  --goto-icon-color-success:    var(--goto-green-500);
+  --goto-icon-color-danger:     var(--goto-red-500);
+  --goto-icon-color-warning:    var(--goto-yellow-500);
+
+  /* Surface (semantic fills — from gotoapp.json) */
+  --goto-surface-color-default:             rgb(255, 255, 255);
+  --goto-surface-color-secondary:           rgb(247, 247, 247);
+  --goto-surface-color-success-default:     var(--goto-green-500);
+  --goto-surface-color-success-secondary:   rgba(27, 135, 86, 0.1);
+  --goto-surface-color-danger-default:      var(--goto-red-500);
+  --goto-surface-color-danger-secondary:    rgba(209, 47, 58, 0.1);
+  --goto-surface-color-warning-default:     var(--goto-yellow-500);
+  --goto-surface-color-warning-secondary:   rgba(242, 221, 6, 0.1);
+  --goto-surface-color-persistent:          rgb(0, 0, 0);
+  --goto-surface-color-brand-secondary:     rgba(133, 82, 246, 0.1);  /* purple-500 @ 10% — resolve skin */
+  --goto-surface-color-brand-default:       var(--goto-purple-500);   /* brand fill — tabs indicator, buttons */
+
+  /* Inverted (text/icons on dark or saturated surfaces) */
+  --goto-surface-color-inverted: rgb(23, 27, 31);    /* neutral-850 — toasts, tooltips, banner neutral */
+  --goto-type-color-inverted:  rgb(255, 255, 255);
+  --goto-icon-color-inverted:  rgb(255, 255, 255);
+
+  /* Interactive (button fills) */
+  --goto-interactive-color-brand-primary-default: var(--goto-purple-500);
+  --goto-interactive-color-brand-primary-hover:   var(--goto-purple-600);
+  --goto-interactive-color-brand-primary-pressed: var(--goto-purple-700);
+  --goto-interactive-color-neutral-secondary-default: rgba(0, 0, 0, 0.06);
+  --goto-interactive-color-neutral-secondary-hover:   rgba(0, 0, 0, 0.10);
+  --goto-interactive-color-neutral-secondary-pressed: rgba(0, 0, 0, 0.14);
+  --goto-interactive-color-danger-primary-default: var(--goto-red-500);
+  --goto-interactive-color-danger-primary-hover:   var(--goto-red-600);
+  --goto-interactive-color-danger-primary-pressed: var(--goto-red-700);
+  --goto-interactive-color-disabled: rgba(0, 0, 0, 0.08);
+
+  /* Borders */
+  --goto-border-color-default:    rgba(88, 121, 143, 0.5);
+  --goto-border-color-strong:     var(--goto-neutral-600);
+  --goto-border-color-secondary:  rgb(247, 247, 247);
+  --goto-border-color-brand:      var(--goto-purple-500);
+  --goto-border-color-danger:     var(--goto-red-500);
+  --goto-border-color-success:    var(--goto-green-500);
+  --goto-border-color-warning:    var(--goto-yellow-500);
+
+  /* Focus */
+  --goto-focus-color-highlight-default: var(--goto-neutral-900);
+
+  /* Avatar palette — from resolve.json
+     Six hue groups (0=pink, 1=amber, 2=olive, 3=teal, 4=blue, 5=purple) × 3 shades each.
+     avatar-color-XX = fill, avatar-type-XX = matching on-surface text. Always use as a pair. */
+  --goto-avatar-color-00: rgba(253, 227, 233, 1);  --goto-avatar-type-00: rgba(144, 81, 101, 1);
+  --goto-avatar-color-01: rgba(254, 227, 225, 1);  --goto-avatar-type-01: rgba(149, 83, 84, 1);
+  --goto-avatar-color-02: rgba(253, 229, 221, 1);  --goto-avatar-type-02: rgba(148, 86, 65, 1);
+  --goto-avatar-color-10: rgba(250, 231, 217, 1);  --goto-avatar-type-10: rgba(142, 92, 48, 1);
+  --goto-avatar-color-11: rgba(245, 234, 214, 1);  --goto-avatar-type-11: rgba(132, 99, 37, 1);
+  --goto-avatar-color-12: rgba(239, 236, 215, 1);  --goto-avatar-type-12: rgba(117, 106, 38, 1);
+  --goto-avatar-color-20: rgba(232, 238, 217, 1);  --goto-avatar-type-20: rgba(98, 112, 50, 1);
+  --goto-avatar-color-21: rgba(226, 240, 222, 1);  --goto-avatar-type-21: rgba(76, 117, 67, 1);
+  --goto-avatar-color-22: rgba(222, 242, 231, 1);  --goto-avatar-type-22: rgba(50, 118, 86, 1);
+  --goto-avatar-color-30: rgba(216, 242, 236, 1);  --goto-avatar-type-30: rgba(23, 120, 106, 1);
+  --goto-avatar-color-31: rgba(219, 243, 245, 1);  --goto-avatar-type-31: rgba(0, 118, 122, 1);
+  --goto-avatar-color-32: rgba(220, 242, 249, 1);  --goto-avatar-type-32: rgba(23, 116, 140, 1);
+  --goto-avatar-color-40: rgba(219, 238, 253, 1);  --goto-avatar-type-40: rgba(49, 110, 149, 1);
+  --goto-avatar-color-41: rgba(224, 236, 255, 1);  --goto-avatar-type-41: rgba(74, 105, 156, 1);
+  --goto-avatar-color-42: rgba(231, 234, 255, 1);  --goto-avatar-type-42: rgba(93, 97, 152, 1);
+  --goto-avatar-color-50: rgba(238, 231, 252, 1);  --goto-avatar-type-50: rgba(110, 91, 144, 1);
+  --goto-avatar-color-51: rgba(244, 229, 247, 1);  --goto-avatar-type-51: rgba(124, 86, 134, 1);
+  --goto-avatar-color-52: rgba(249, 226, 240, 1);  --goto-avatar-type-52: rgba(137, 83, 119, 1);
+  --goto-avatar-color-primary:   rgba(148, 152, 155, 1);
+  --goto-avatar-color-secondary: rgba(217, 227, 233, 1);
+
+  /* Product brand colors (GoTo family) */
+  --goto-brand-resolve:  rgb(125, 51, 255);
+  --goto-brand-meeting:  rgb(246, 141, 46);
+  --goto-brand-connect:  rgb(0, 170, 110);
+  --goto-brand-webinar:  rgb(0, 192, 243);
+  --goto-brand-training: rgb(153, 41, 119);
+
+  /* ========================================================================
+     SPACING — from tokens/base.json
+     Chameleon has TWO scales: spacing (inside components) and layout (between sections).
+     ======================================================================== */
+  --goto-spacing-00: 0px;
+  --goto-spacing-01: 4px;
+  --goto-spacing-02: 8px;
+  --goto-spacing-03: 12px;
+  --goto-spacing-04: 16px;
+  --goto-spacing-05: 20px;
+  --goto-spacing-06: 24px;
+  --goto-spacing-07: 32px;
+  --goto-spacing-08: 40px;
+  --goto-spacing-09: 48px;
+  --goto-spacing-10: 56px;
+  --goto-spacing-11: 64px;
+
+  --goto-layout-00: 0px;
+  --goto-layout-01: 16px;
+  --goto-layout-02: 24px;
+  --goto-layout-03: 32px;
+  --goto-layout-04: 48px;
+  --goto-layout-05: 64px;
+  --goto-layout-06: 96px;
+  --goto-layout-07: 160px;
+
+  /* ========================================================================
+     RADII
+     ======================================================================== */
+  --goto-radius-none:   0px;
+  --goto-radius-small:  4px;   /* buttons, inputs */
+  --goto-radius-medium: 8px;   /* cards, menus */
+  --goto-radius-large:  12px;  /* dialogs */
+  --goto-radius-xlarge: 16px;  /* hero surfaces */
+  --goto-radius-circle: 1000px;
+
+  /* ========================================================================
+     ELEVATION (box-shadow)
+     ======================================================================== */
+  --goto-elevation-none:   none;
+  --goto-elevation-small:  0px 1px 3px rgba(0,0,0,0.2), 0px 2px 1px rgba(0,0,0,0.12), 0px 1px 1px rgba(0,0,0,0.14);
+  --goto-elevation-medium: 0px 2px 4px rgba(0,0,0,0.2), 0px 1px 10px rgba(0,0,0,0.12), 0px 4px 5px rgba(0,0,0,0.14);
+  --goto-elevation-large:  0px 5px 6px rgba(0,0,0,0.2), 0px 3px 16px rgba(0,0,0,0.12), 0px 9px 12px rgba(0,0,0,0.14);
+  --goto-elevation-xlarge: 0px 11px 15px rgba(0,0,0,0.2), 0px 9px 46px rgba(0,0,0,0.12), 0px 24px 38px rgba(0,0,0,0.14);
+
+  /* ========================================================================
+     BLUR (for glass surfaces)
+     ======================================================================== */
+  --goto-blur-small:  10px;
+  --goto-blur-medium: 30px;
+  --goto-blur-large:  50px;
+  --goto-blur-xlarge: 70px;
+
+  /* ========================================================================
+     MOTION
+     ======================================================================== */
+  --goto-duration-snappy-01:    70ms;
+  --goto-duration-snappy-02:   110ms;
+  --goto-duration-modest-01:   150ms;   /* default for most micro-interactions */
+  --goto-duration-modest-02:   240ms;
+  --goto-duration-lethargic-01: 400ms;
+  --goto-duration-lethargic-02: 700ms;
+  --goto-duration-sluggish:    1300ms;
+
+  --goto-entrance-easing: cubic-bezier(0, 0, 0.3, 1);       /* ease-out */
+  --goto-exit-easing:     cubic-bezier(0.4, 0.14, 1, 1);    /* ease-in */
+  --goto-standard-easing: cubic-bezier(0.4, 0.14, 0.3, 1);  /* ease-in-out, snappy */
+
+  /* ========================================================================
+     Z-INDEX LAYERS
+     ======================================================================== */
+  --goto-z-deep:      -999999;
+  --goto-z-default:    1;
+  --goto-z-masked:     100;
+  --goto-z-mask:       200;
+  --goto-z-sticky:     300;
+  --goto-z-header:     400;
+  --goto-z-toast:      500;
+  --goto-z-dropdown:   600;
+  --goto-z-overlay:    700;
+  --goto-z-loading:    800;
+  --goto-z-modal:      900;
+
+  /* ========================================================================
+     BREAKPOINTS
+     ======================================================================== */
+  --goto-mq-small:  480px;
+  --goto-mq-medium: 768px;
+  --goto-mq-large:  992px;
+  --goto-mq-xlarge: 1280px;
+}
+
+/* ========================================================================
+   DARK THEME OVERRIDES
+   Apply via <html data-theme="dark"> or <body data-theme="dark">.
+   ======================================================================== */
+[data-theme="dark"] {
+  --goto-background-color-default:   rgb(34, 41, 46);      /* neutral-800 */
+  --goto-background-color-secondary: rgb(23, 27, 31);      /* neutral-850 */
+
+  --goto-type-color-default:    rgb(255, 255, 255);
+  --goto-type-color-secondary:  rgb(152, 182, 201);
+  --goto-type-color-placeholder:rgba(255, 255, 255, 0.55);
+  --goto-type-color-disabled:   rgba(255, 255, 255, 0.3);
+  --goto-type-color-brand:      var(--goto-purple-400);
+
+  --goto-icon-color-default:    rgb(195, 212, 222);
+  --goto-icon-color-secondary:  rgb(152, 182, 201);
+  --goto-icon-color-brand:      var(--goto-purple-400);
+  --goto-icon-color-disabled:   rgba(255, 255, 255, 0.3);
+
+  --goto-interactive-color-brand-primary-default: var(--goto-purple-400);
+  --goto-interactive-color-brand-primary-hover:   var(--goto-purple-300);
+  --goto-interactive-color-brand-primary-pressed: var(--goto-purple-200);
+  --goto-interactive-color-neutral-secondary-default: rgba(255, 255, 255, 0.08);
+  --goto-interactive-color-neutral-secondary-hover:   rgba(255, 255, 255, 0.14);
+  --goto-interactive-color-neutral-secondary-pressed: rgba(255, 255, 255, 0.20);
+  --goto-interactive-color-disabled: rgba(255, 255, 255, 0.08);
+
+  --goto-border-color-default:    rgba(88, 121, 143, 0.5);
+  --goto-border-color-strong:     rgb(152, 182, 201);
+  --goto-border-color-secondary:  rgb(23, 27, 31);
+
+  --goto-focus-color-highlight-default: rgb(255, 255, 255);
+}
+
+/* ========================================================================
+   SEMANTIC ELEMENT DEFAULTS
+   Apply font + color tokens to bare HTML so plain markup looks right.
+   ======================================================================== */
+html, body {
+  font: var(--goto-body-medium);
+  color: var(--goto-type-color-default);
+  background: var(--goto-background-color-default);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1 { font: var(--goto-heading-xlarge); margin: 0; }
+h2 { font: var(--goto-heading-large);  margin: 0; }
+h3 { font: var(--goto-heading-medium); margin: 0; }
+h4 { font: var(--goto-heading-small);  margin: 0; }
+h5 { font: var(--goto-body-large-strong); margin: 0; }
+h6 { font: var(--goto-body-medium-strong); margin: 0; }
+
+p   { font: var(--goto-body-medium); margin: 0 0 var(--goto-spacing-04); }
+small { font: var(--goto-caption-medium); color: var(--goto-type-color-secondary); }
+code, pre, kbd, samp { font: var(--goto-code-medium); }
+
+a {
+  color: var(--goto-type-color-brand);
+  text-decoration: none;
+  transition: color var(--goto-duration-modest-01) var(--goto-standard-easing);
+}
+a:hover { text-decoration: underline; }
+
+*:focus-visible {
+  outline: 1px solid var(--goto-focus-color-highlight-default);
+  outline-offset: 2px;
+}
